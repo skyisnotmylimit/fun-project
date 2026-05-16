@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aaj toh gaya tu</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(180deg, #87CEEB 0%, #98FB98 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: 'Comic Sans MS', 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin-top: 20px;
+      color: #333;
+      font-size: 2.2rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .scene-wrapper {
+      max-width: 700px;
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .scene {
+      position: relative;
+      width: 700px;
+      height: 420px;
+      transform-origin: top left;
+    }
+
+    /* Ground */
+    .ground {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: #5a9e3e;
+      border-radius: 8px 8px 0 0;
+    }
+
+    /* ── STICKMAN BASE ── */
+    .stickman {
+      position: absolute;
+      bottom: 60px;
+      width: 120px;
+      height: 220px;
+    }
+
+    /* Head */
+    .head {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #222;
+      border-radius: 50%;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+    }
+
+    /* Body */
+    .body-line {
+      width: 4px;
+      height: 80px;
+      background: #222;
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      transform-origin: top center;
+    }
+
+    /* Arms */
+    .arms {
+      position: absolute;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+    }
+
+    .arm {
+      position: absolute;
+      width: 40px;
+      height: 4px;
+      background: #222;
+      top: 0;
+      transform-origin: left center;
+    }
+    .arm.left { left: 0; transform: rotate(0deg); }
+    .arm.right { right: 0; left: auto; transform-origin: right center; transform: rotate(0deg); }
+
+    /* Legs */
+    .leg {
+      position: absolute;
+      width: 4px;
+      height: 70px;
+      background: #222;
+      top: 130px;
+      transform-origin: top center;
+    }
+    .leg.left { left: 35px; transform: rotate(20deg); }
+    .leg.right { left: 81px; transform: rotate(-20deg); }
+
+    /* ── GIRL (left) ── */
+    .girl {
+      left: 120px;
+    }
+
+    /* Hair / bow */
+    .hair {
+      position: absolute;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 30px;
+      border-radius: 50% 50% 0 0;
+      background: #222;
+      z-index: -1;
+    }
+    .bow {
+      position: absolute;
+      top: -10px;
+      left: 72px;
+      width: 0; height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-bottom: 14px solid #ff4081;
+    }
+    .ponytail {
+      position: absolute;
+      top: 10px;
+      left: 80px;
+      width: 6px;
+      height: 50px;
+      background: #222;
+      border-radius: 0 0 4px 4px;
+      transform: rotate(15deg);
+      transform-origin: top left;
+    }
+
+    /* Skirt */
+    .skirt {
+      position: absolute;
+      top: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 28px solid transparent;
+      border-right: 28px solid transparent;
+      border-top: 30px solid #ff4081;
+    }
+
+    /* Stick container (scene-level, handles translation) */
+    .stick-container {
+      position: absolute;
+      left: 200px;
+      top: 195px;
+      width: 6px;
+      height: 120px;
+      z-index: 6;
+    }
+
+    /* Stick (weapon, handles rotation) */
+    .stick-weapon {
+      width: 6px;
+      height: 120px;
+      background: linear-gradient(#6d3610, #8B4513 30%, #A0522D 70%, #c47a4a);
+      border-radius: 3px;
+      transform-origin: bottom center;
+      transform: rotate(-40deg);
+    }
+
+    /* ── BOY (right) ── */
+    .boy {
+      left: 440px;
+    }
+
+    .boy .head {
+      background: #fff;
+    }
+
+    /* Short hair */
+    .short-hair {
+      position: absolute;
+      top: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 54px;
+      height: 18px;
+      border-radius: 50% 50% 0 0;
+      background: #222;
+      z-index: -1;
+    }
+
+    /* ── LABEL ── */
+    .label {
+      position: absolute;
+      bottom: 20px;
+      width: 120px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1rem;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+    .girl .label { left: 0; }
+    .boy .label { left: 0; }
+
+    /* ── HIT BUTTON ── */
+    .btn-hit {
+      margin-top: 24px;
+      padding: 16px 60px;
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #fff;
+      background: linear-gradient(135deg, #e53935, #d32f2f);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 20px rgba(229,57,53,0.5);
+      transition: transform 0.1s, box-shadow 0.1s;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .btn-hit:hover { transform: scale(1.05); box-shadow: 0 8px 28px rgba(229,57,53,0.6); }
+    .btn-hit:active { transform: scale(0.97); }
+
+    /* ── HIT COUNTER ── */
+    .hit-counter {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      color: #444;
+    }
+
+    /* ── IMPACT MESSAGE ── */
+    .impact-msg {
+      position: absolute;
+      font-size: 2rem;
+      font-weight: bold;
+      color: #e53935;
+      text-shadow: 2px 2px 0 #ff8a80;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+    }
+
+    /* ── STARS ── */
+    .star {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.6rem;
+      opacity: 0;
+      z-index: 10;
+    }
+
+    /* ── ANIMATIONS ── */
+
+    /* Girl lean during swing */
+    @keyframes girlSwing {
+      0%   { transform: rotate(0deg); }
+      12%  { transform: rotate(-8deg); }
+      40%  { transform: rotate(6deg); }
+      55%  { transform: rotate(14deg); }
+      70%  { transform: rotate(8deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .girl.swinging {
+      transform-origin: bottom center;
+      animation: girlSwing 0.9s ease-in-out;
+    }
+
+    /* Girl right arm raises during swing */
+    @keyframes armRaise {
+      0%   { transform: rotate(0deg); }
+      12%  { transform: rotate(-40deg); }
+      40%  { transform: rotate(-90deg); }
+      55%  { transform: rotate(-70deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .girl.swinging .arm.right {
+      animation: armRaise 0.9s ease-in-out;
+    }
+
+    /* Stick container translation (arc path) */
+    @keyframes stickMove {
+      0%   { transform: translate(0, 0); }
+      12%  { transform: translate(-25px, -30px); }
+      35%  { transform: translate(120px, -170px); }
+      52%  { transform: translate(265px, -70px); }
+      60%  { transform: translate(250px, -85px); }
+      100% { transform: translate(0, 0); }
+    }
+    .stick-container.swinging {
+      animation: stickMove 0.9s ease-in-out;
+    }
+
+    /* Stick rotation (swing arc) */
+    @keyframes stickRotate {
+      0%   { transform: rotate(-40deg); }
+      12%  { transform: rotate(-120deg); }
+      35%  { transform: rotate(-10deg); }
+      52%  { transform: rotate(25deg); }
+      60%  { transform: rotate(12deg); }
+      100% { transform: rotate(-40deg); }
+    }
+    .stick-weapon.swinging {
+      animation: stickRotate 0.9s ease-in-out;
+    }
+
+    /* Boy recoil */
+    @keyframes boyRecoil {
+      0%   { transform: translateX(0) rotate(0); }
+      20%  { transform: translateX(18px) rotate(8deg); }
+      40%  { transform: translateX(12px) rotate(-4deg); }
+      60%  { transform: translateX(6px) rotate(3deg); }
+      100% { transform: translateX(0) rotate(0); }
+    }
+    .boy.hit {
+      animation: boyRecoil 0.6s ease-out;
+    }
+
+    /* Boy head shake */
+    @keyframes headShake {
+      0%   { transform: translateX(-50%) rotate(0) translateY(0); }
+      10%  { transform: translateX(-50%) rotate(0) translateY(6px); }
+      20%  { transform: translateX(-50%) rotate(-18deg) translateY(3px); }
+      35%  { transform: translateX(-50%) rotate(14deg) translateY(0); }
+      50%  { transform: translateX(-50%) rotate(-10deg); }
+      65%  { transform: translateX(-50%) rotate(6deg); }
+      100% { transform: translateX(-50%) rotate(0); }
+    }
+    .boy.hit .head {
+      animation: headShake 0.6s ease-out;
+    }
+
+    /* Impact message float up */
+    @keyframes floatUp {
+      0%   { opacity: 1; transform: translate(-50%, 0) scale(0.5) rotate(-10deg); }
+      30%  { opacity: 1; transform: translate(-50%, -30px) scale(1.3) rotate(5deg); }
+      100% { opacity: 0; transform: translate(-50%, -90px) scale(0.8) rotate(-3deg); }
+    }
+
+    /* Star burst */
+    @keyframes starBurst {
+      0%   { opacity: 1; transform: translate(0,0) scale(0.5); }
+      100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(1.2); }
+    }
+
+    /* Screen shake */
+    @keyframes screenShake {
+      0%   { transform: translate(0, 0); }
+      15%  { transform: translate(-4px, 2px); }
+      30%  { transform: translate(4px, -2px); }
+      45%  { transform: translate(-3px, 3px); }
+      60%  { transform: translate(3px, -1px); }
+      75%  { transform: translate(-1px, 2px); }
+      100% { transform: translate(0, 0); }
+    }
+    .scene-wrapper.shaking {
+      animation: screenShake 0.35s ease-out;
+    }
+
+    /* Boy bump on head */
+    .bump {
+      position: absolute;
+      width: 18px;
+      height: 14px;
+      background: #ff6b6b;
+      border-radius: 50%;
+      border: 2px solid #c0392b;
+      opacity: 0;
+      z-index: 5;
+      transition: opacity 0.3s;
+    }
+    .bump.visible {
+      opacity: 1;
+    }
+
+    /* Dizzy eyes */
+    @keyframes dizzyEyes {
+      0%   { content: '😵'; }
+      50%  { content: '😵‍💫'; }
+      100% { content: '😵'; }
+    }
+    .dizzy-face {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .dizzy-face.visible {
+      opacity: 1;
+    }
+
+    /* Eyes */
+    .eyes {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+    }
+    .eye {
+      width: 6px;
+      height: 6px;
+      background: #222;
+      border-radius: 50%;
+    }
+
+    /* Smile */
+    .mouth {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 8px;
+      border-bottom: 3px solid #222;
+      border-radius: 0 0 50% 50%;
+    }
+
+    /* Girl smile (smirk) */
+    .girl .mouth {
+      border-bottom: 3px solid #222;
+    }
+
+    /* Boy frown when hit */
+    .boy .mouth {
+      transition: all 0.2s;
+    }
+    .boy .mouth.sad {
+      border-bottom: none;
+      border-top: 3px solid #222;
+      border-radius: 50% 50% 0 0;
+      bottom: 8px;
+    }
+
+    /* X eyes for boy when hit many times */
+    .x-eyes {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #222;
+      opacity: 0;
+      pointer-events: none;
+      letter-spacing: 6px;
+    }
+    .x-eyes.visible {
+      opacity: 1;
+    }
+
+    /* ── MOBILE RESPONSIVE ── */
+    @media (max-width: 740px) {
+      h1 {
+        font-size: 1.4rem;
+        margin-top: 12px;
+      }
+      .scene-wrapper {
+        margin-top: 10px;
+      }
+      .btn-hit {
+        margin-top: 14px;
+        padding: 12px 40px;
+        font-size: 1.2rem;
+      }
+      .hit-counter {
+        font-size: 0.95rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h1 {
+        font-size: 1.1rem;
+        margin-top: 8px;
+      }
+      .btn-hit {
+        margin-top: 10px;
+        padding: 10px 30px;
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Aaj toh pitega tu..!</h1>
+
+  <div class="scene-wrapper" id="sceneWrapper">
+  <div class="scene" id="scene">
+
+    <!-- GIRL STICKMAN -->
+    <div class="stickman girl" id="girl">
+      <div class="head">
+        <div class="hair"></div>
+        <div class="bow"></div>
+        <div class="ponytail"></div>
+        <div class="eyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="mouth"></div>
+      </div>
+      <div class="body-line"></div>
+      <div class="arms">
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+      <div class="skirt"></div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+      <div class="label">Janvi💪</div>
+    </div>
+
+    <!-- STICK WEAPON (scene-level for arc animation) -->
+    <div class="stick-container" id="stickContainer">
+      <div class="stick-weapon" id="stick"></div>
+    </div>
+
+    <!-- BOY STICKMAN -->
+    <div class="stickman boy" id="boy">
+      <div class="head" id="boyHead">
+        <div class="short-hair"></div>
+        <div class="eyes" id="boyEyes"><div class="eye"></div><div class="eye"></div></div>
+        <div class="x-eyes" id="xEyes">✕ ✕</div>
+        <div class="mouth" id="boyMouth"></div>
+        <div class="bump" id="bump1" style="top:-8px; left:10px;"></div>
+        <div class="bump" id="bump2" style="top:-12px; left:28px;"></div>
+        <div class="bump" id="bump3" style="top:-6px; left:38px;"></div>
+      </div>
+      <div class="body-line"></div>
+      <div class="arms">
+        <div class="arm left"></div>
+        <div class="arm right"></div>
+      </div>
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+      <div class="label">Shubham 😢</div>
+    </div>
+
+    <div class="ground"></div>
+  </div>
+  </div>
+
+  <button class="btn-hit" id="hitBtn">💥 HIT 💥</button>
+  <div class="hit-counter" id="counter">Hits: 0</div>
+
+  <script>
+    const scene = document.getElementById('scene');
+    const girl = document.getElementById('girl');
+    const boy = document.getElementById('boy');
+    const stickContainer = document.getElementById('stickContainer');
+    const stick = document.getElementById('stick');
+    const hitBtn = document.getElementById('hitBtn');
+    const counterEl = document.getElementById('counter');
+    const boyMouth = document.getElementById('boyMouth');
+    const boyEyes = document.getElementById('boyEyes');
+    const xEyes = document.getElementById('xEyes');
+    const bumps = [
+      document.getElementById('bump1'),
+      document.getElementById('bump2'),
+      document.getElementById('bump3')
+    ];
+
+    let hitCount = 0;
+    let isAnimating = false;
+
+    const impactMessages = [
+      'BONK!', 'WHACK!', 'SMACK!', 'POW!', 'BAM!',
+      'THWACK!', 'CRACK!', 'OUCH!', 'WHAM!', 'KAPOW!',
+      'THUD!', 'CLONK!', 'BOING!', 'SPLAT!', 'KABOOM!'
+    ];
+
+    const subMessages = [
+      'That\'s gotta hurt! 😵',
+      'Right on the noggin!',
+      'I didn\'t see that coming!',
+      'Shittt 💀',
+      'Chal hattt',
+      'Chup kr gadha kahika 🎯',
+      'Marungiii! 😤',
+      'Ouch ouch ouch ⭐',
+      'Ye le...aur le 🧊',
+      'Bas bhi karoo💥'
+    ];
+
+    const starChars = ['⭐', '💥', '✨', '💫', '⚡', '🌟', '💢'];
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function showImpactMessage() {
+      const msg = document.createElement('div');
+      msg.className = 'impact-msg';
+      msg.textContent = getRandomItem(impactMessages);
+      msg.style.left = (440 + Math.random() * 60) + 'px';
+      msg.style.top = (20 + Math.random() * 40) + 'px';
+      msg.style.animation = 'floatUp 0.7s ease-out forwards';
+      msg.style.color = `hsl(${Math.random() * 40}, 90%, 50%)`;
+      scene.appendChild(msg);
+      setTimeout(() => msg.remove(), 750);
+
+      // Sub-message every 3rd hit
+      if (hitCount % 3 === 0) {
+        const sub = document.createElement('div');
+        sub.className = 'impact-msg';
+        sub.textContent = getRandomItem(subMessages);
+        sub.style.left = (400 + Math.random() * 80) + 'px';
+        sub.style.top = (70 + Math.random() * 30) + 'px';
+        sub.style.fontSize = '1rem';
+        sub.style.color = '#333';
+        sub.style.textShadow = 'none';
+        sub.style.animation = 'floatUp 1s ease-out 0.2s forwards';
+        scene.appendChild(sub);
+        setTimeout(() => sub.remove(), 1200);
+      }
+    }
+
+    function showStars() {
+      const count = 4 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.textContent = getRandomItem(starChars);
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+        const dist = 40 + Math.random() * 50;
+        star.style.left = (470) + 'px';
+        star.style.top = (55) + 'px';
+        star.style.setProperty('--sx', Math.cos(angle) * dist + 'px');
+        star.style.setProperty('--sy', Math.sin(angle) * dist + 'px');
+        star.style.animation = `starBurst ${0.4 + Math.random() * 0.3}s ease-out forwards`;
+        star.style.animationDelay = (Math.random() * 0.1) + 's';
+        scene.appendChild(star);
+        setTimeout(() => star.remove(), 800);
+      }
+    }
+
+    function updateBoyState() {
+      // Show bumps based on hit count
+      bumps.forEach((bump, i) => {
+        if (hitCount >= (i + 1) * 3) {
+          bump.classList.add('visible');
+        }
+      });
+
+      // Sad mouth
+      if (hitCount >= 1) {
+        boyMouth.classList.add('sad');
+      }
+
+      // X eyes when hit a lot
+      if (hitCount >= 10) {
+        boyEyes.style.opacity = '0';
+        xEyes.classList.add('visible');
+      } else {
+        boyEyes.style.opacity = '1';
+        xEyes.classList.remove('visible');
+      }
+    }
+
+    function triggerHit() {
+      if (isAnimating) return;
+      isAnimating = true;
+      hitCount++;
+      counterEl.textContent = `Hits: ${hitCount}`;
+
+      // Remove old animation classes
+      girl.classList.remove('swinging');
+      stickContainer.classList.remove('swinging');
+      stick.classList.remove('swinging');
+      boy.classList.remove('hit');
+      sceneWrapper.classList.remove('shaking');
+
+      // Force reflow
+      void girl.offsetWidth;
+
+      // Start animations
+      girl.classList.add('swinging');
+      stickContainer.classList.add('swinging');
+      stick.classList.add('swinging');
+
+      // Delay boy reaction to match stick contact (~52% of 0.9s)
+      setTimeout(() => {
+        boy.classList.add('hit');
+        sceneWrapper.classList.add('shaking');
+        showImpactMessage();
+        showStars();
+        updateBoyState();
+      }, 430);
+
+      // Reset after full animation
+      setTimeout(() => {
+        girl.classList.remove('swinging');
+        stickContainer.classList.remove('swinging');
+        stick.classList.remove('swinging');
+        boy.classList.remove('hit');
+        sceneWrapper.classList.remove('shaking');
+        isAnimating = false;
+      }, 1000);
+    }
+
+    hitBtn.addEventListener('click', triggerHit);
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.key === 'Enter') {
+        e.preventDefault();
+        triggerHit();
+      }
+    });
+
+    // Responsive scaling
+    const sceneWrapper = document.getElementById('sceneWrapper');
+    function resizeScene() {
+      const padding = 16;
+      const availableWidth = Math.min(window.innerWidth - padding, 700);
+      const scale = availableWidth / 700;
+      scene.style.transform = `scale(${scale})`;
+      sceneWrapper.style.width = (700 * scale) + 'px';
+      sceneWrapper.style.height = (420 * scale) + 'px';
+    }
+    resizeScene();
+    window.addEventListener('resize', resizeScene);
+  </script>
+</body>
+</html>
