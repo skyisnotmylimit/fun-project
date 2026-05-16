@@ -172,16 +172,39 @@
       width: 6px;
       height: 120px;
       z-index: 6;
+      display: none;
     }
 
-    /* Stick (weapon, handles rotation) */
-    .stick-weapon {
-      width: 6px;
-      height: 120px;
-      background: linear-gradient(#6d3610, #8B4513 30%, #A0522D 70%, #c47a4a);
-      border-radius: 3px;
-      transform-origin: bottom center;
-      transform: rotate(-40deg);
+    /* Swing arm (girl's right arm + stick as one unit) */
+    .swing-arm {
+      position: absolute;
+      top: 70px;
+      left: 60px;
+      width: 180px;
+      height: 6px;
+      transform-origin: left center;
+      transform: rotate(55deg);
+      z-index: 3;
+    }
+
+    .swing-arm .arm-part {
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 40px;
+      height: 4px;
+      background: #222;
+    }
+
+    /* Stick (weapon, attached to arm) */
+    .swing-arm .stick-weapon {
+      position: absolute;
+      left: 36px;
+      top: 0;
+      width: 140px;
+      height: 6px;
+      background: linear-gradient(90deg, #6d3610, #8B4513 30%, #A0522D 70%, #c47a4a);
+      border-radius: 0 3px 3px 0;
     }
 
     /* ── BOY (right) ── */
@@ -269,56 +292,31 @@
 
     /* ── ANIMATIONS ── */
 
-    /* Girl lean during swing */
+    /* Girl lunge + lean during swing */
     @keyframes girlSwing {
-      0%   { transform: rotate(0deg); }
-      12%  { transform: rotate(-8deg); }
-      40%  { transform: rotate(6deg); }
-      55%  { transform: rotate(14deg); }
-      70%  { transform: rotate(8deg); }
-      100% { transform: rotate(0deg); }
+      0%   { transform: translateX(0) rotate(0deg); }
+      15%  { transform: translateX(-10px) rotate(-5deg); }
+      40%  { transform: translateX(80px) rotate(4deg); }
+      55%  { transform: translateX(130px) rotate(10deg); }
+      65%  { transform: translateX(110px) rotate(6deg); }
+      100% { transform: translateX(0) rotate(0deg); }
     }
     .girl.swinging {
       transform-origin: bottom center;
-      animation: girlSwing 0.9s ease-in-out;
+      animation: girlSwing 0.85s ease-in-out;
     }
 
-    /* Girl right arm raises during swing */
-    @keyframes armRaise {
-      0%   { transform: rotate(0deg); }
-      12%  { transform: rotate(-40deg); }
-      40%  { transform: rotate(-90deg); }
-      55%  { transform: rotate(-70deg); }
-      100% { transform: rotate(0deg); }
+    /* Arm + stick swing arc */
+    @keyframes armSwing {
+      0%   { transform: rotate(55deg); }
+      15%  { transform: rotate(-150deg); }
+      35%  { transform: rotate(-100deg); }
+      55%  { transform: rotate(-20deg); }
+      62%  { transform: rotate(-8deg); }
+      100% { transform: rotate(55deg); }
     }
-    .girl.swinging .arm.right {
-      animation: armRaise 0.9s ease-in-out;
-    }
-
-    /* Stick container translation (arc path) */
-    @keyframes stickMove {
-      0%   { transform: translate(0, 0); }
-      12%  { transform: translate(-25px, -30px); }
-      35%  { transform: translate(120px, -170px); }
-      52%  { transform: translate(265px, -70px); }
-      60%  { transform: translate(250px, -85px); }
-      100% { transform: translate(0, 0); }
-    }
-    .stick-container.swinging {
-      animation: stickMove 0.9s ease-in-out;
-    }
-
-    /* Stick rotation (swing arc) */
-    @keyframes stickRotate {
-      0%   { transform: rotate(-40deg); }
-      12%  { transform: rotate(-120deg); }
-      35%  { transform: rotate(-10deg); }
-      52%  { transform: rotate(25deg); }
-      60%  { transform: rotate(12deg); }
-      100% { transform: rotate(-40deg); }
-    }
-    .stick-weapon.swinging {
-      animation: stickRotate 0.9s ease-in-out;
+    .swing-arm.swinging {
+      animation: armSwing 0.85s ease-in-out;
     }
 
     /* Boy recoil */
@@ -522,17 +520,15 @@
       <div class="body-line"></div>
       <div class="arms">
         <div class="arm left"></div>
-        <div class="arm right"></div>
+      </div>
+      <div class="swing-arm" id="swingArm">
+        <div class="arm-part"></div>
+        <div class="stick-weapon" id="stick"></div>
       </div>
       <div class="skirt"></div>
       <div class="leg left"></div>
       <div class="leg right"></div>
       <div class="label">Janvi💪</div>
-    </div>
-
-    <!-- STICK WEAPON (scene-level for arc animation) -->
-    <div class="stick-container" id="stickContainer">
-      <div class="stick-weapon" id="stick"></div>
     </div>
 
     <!-- BOY STICKMAN -->
@@ -567,7 +563,7 @@
     const scene = document.getElementById('scene');
     const girl = document.getElementById('girl');
     const boy = document.getElementById('boy');
-    const stickContainer = document.getElementById('stickContainer');
+    const swingArm = document.getElementById('swingArm');
     const stick = document.getElementById('stick');
     const hitBtn = document.getElementById('hitBtn');
     const counterEl = document.getElementById('counter');
@@ -685,8 +681,7 @@
 
       // Remove old animation classes
       girl.classList.remove('swinging');
-      stickContainer.classList.remove('swinging');
-      stick.classList.remove('swinging');
+      swingArm.classList.remove('swinging');
       boy.classList.remove('hit');
       sceneWrapper.classList.remove('shaking');
 
@@ -695,27 +690,25 @@
 
       // Start animations
       girl.classList.add('swinging');
-      stickContainer.classList.add('swinging');
-      stick.classList.add('swinging');
+      swingArm.classList.add('swinging');
 
-      // Delay boy reaction to match stick contact (~52% of 0.9s)
+      // Delay boy reaction to match stick contact (~55% of 0.85s)
       setTimeout(() => {
         boy.classList.add('hit');
         sceneWrapper.classList.add('shaking');
         showImpactMessage();
         showStars();
         updateBoyState();
-      }, 430);
+      }, 440);
 
       // Reset after full animation
       setTimeout(() => {
         girl.classList.remove('swinging');
-        stickContainer.classList.remove('swinging');
-        stick.classList.remove('swinging');
+        swingArm.classList.remove('swinging');
         boy.classList.remove('hit');
         sceneWrapper.classList.remove('shaking');
         isAnimating = false;
-      }, 1000);
+      }, 950);
     }
 
     hitBtn.addEventListener('click', triggerHit);
